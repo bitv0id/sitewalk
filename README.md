@@ -15,7 +15,7 @@ failure tells you where to click, not just which URL is broken.
 Point it at any site. No configuration is required beyond the address.
 
 ```console
-$ sitewalk https://example.com
+$ sitewalk https://your-site.example
 
 [1/14] ✓ / → 200
 [2/14] ✓ /events/ → 200
@@ -94,6 +94,9 @@ example says `sitewalk`:
 node bin/cli.js https://example.com
 ```
 
+`example.com` is a single page with no internal links, so it only proves the
+command runs. See [Quick start](#quick-start) for pointing it at a real site.
+
 **Without cloning:**
 
 ```bash
@@ -109,19 +112,29 @@ docker run --rm sitewalk https://example.com --steps 100
 
 ## Quick start
 
+Point it at a site you own, or at a local development server:
+
 ```bash
-# Walk 50 pages of a site, the default
-sitewalk https://example.com
+# 50 steps, the default
+sitewalk https://your-site.example
+
+# Against a local development server
+sitewalk http://localhost:8000
 
 # Deeper walk, gentler on the server
-sitewalk https://example.com --steps 500 --delay 1000
+sitewalk https://your-site.example --steps 200 --delay 1000
 
-# Include subdomains, and seed from sitemap.xml
-sitewalk https://example.com --subdomains --sitemap
+# Include subdomains, and seed extra starting points from sitemap.xml
+sitewalk https://your-site.example --subdomains --sitemap
 
 # Only failures and the summary, plus a machine-readable result
-sitewalk https://example.com --quiet --json result.json
+sitewalk https://your-site.example --quiet --json result.json
 ```
+
+A step is one request, not one new page: redirects are reported without being
+followed, and the walk revisits the entry point whenever it runs out of new
+links. Fifty steps usually means somewhat fewer distinct pages, which is what
+the summary reports.
 
 Exit code is `0` when no broken links were found, `1` when there were, `2` on a
 configuration error.
@@ -192,7 +205,7 @@ prints nothing at all, so cron only mails you when something is broken.
 
 |                     |                                                                                                                                                                                                                                              |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Broken links**    | Every non-2xx status, with the page and the link text that led there.                                                                                                                                                                        |
+| **Broken links**    | Any status other than `200`, apart from redirects, plus network failures and timeouts — each with the page and the link text that led there.                                                                                                 |
 | **Malformed links** | Hrefs that are defects in the markup rather than broken targets: unrendered template placeholders (`{{ data.url }}`, `${…}`, `<%= … %>`), or an email address used as an href without `mailto:`. Detected in the markup and never requested. |
 | **Redirects**       | Reported, never followed. A `301` is a fact about the site, not a failure, and following redirects would let one misconfigured route swallow the whole run.                                                                                  |
 
@@ -203,25 +216,32 @@ redirect, every malformed href, and the counts of what was skipped and why.
 
 ### Command line
 
-| Option                |                                                                  |
-| --------------------- | ---------------------------------------------------------------- |
-| `-s, --steps <n>`     | Pages to visit (default 50)                                      |
-| `--delay <ms>`        | Pause between requests (default 250)                             |
-| `--timeout <ms>`      | Per-request timeout (default 15000)                              |
-| `--retries <n>`       | Retries for network errors and 429/502/503/504 (default 2)       |
-| `--subdomains`        | Treat subdomains of the entry host as part of the site           |
-| `--no-robots`         | Ignore `robots.txt` and `rel=nofollow` — only for a site you own |
-| `--sitemap`           | Seed extra starting points from `sitemap.xml`                    |
-| `--seed <url>`        | Extra starting point, repeatable                                 |
-| `--exclude <pattern>` | Skip matching paths, repeatable                                  |
-| `--per-template <n>`  | Max pages per URL shape (default 8)                              |
-| `--user-agent <s>`    | User-Agent to send                                               |
-| `--proxy <url>`       | Route requests through an HTTP proxy                             |
-| `--insecure`          | Accept invalid TLS certificates                                  |
-| `--json <path>`       | Write the full result as JSON                                    |
-| `-q, --quiet`         | Only failures and the summary                                    |
-| `-h, --help`          | Show help                                                        |
-| `-V, --version`       | Show the version                                                 |
+```
+sitewalk <url> [options]
+sitewalk --config sitewalk.config.js
+```
+
+| Option                |                                                                   |
+| --------------------- | ----------------------------------------------------------------- |
+| `-u, --url <url>`     | Entry point. May also be given as the first positional argument.  |
+| `-c, --config <path>` | Configuration file (default: `./sitewalk.config.js` when present) |
+| `-s, --steps <n>`     | Steps to take, one request each (default 50)                      |
+| `--delay <ms>`        | Pause between requests (default 250)                              |
+| `--timeout <ms>`      | Per-request timeout (default 15000)                               |
+| `--retries <n>`       | Retries for network errors and 429/502/503/504 (default 2)        |
+| `--subdomains`        | Treat subdomains of the entry host as part of the site            |
+| `--no-robots`         | Ignore `robots.txt` and `rel=nofollow` — only for a site you own  |
+| `--sitemap`           | Seed extra starting points from `sitemap.xml`                     |
+| `--seed <url>`        | Extra starting point, repeatable                                  |
+| `--exclude <pattern>` | Skip matching paths, repeatable                                   |
+| `--per-template <n>`  | Max pages per URL shape (default 8)                               |
+| `--user-agent <s>`    | User-Agent to send                                                |
+| `--proxy <url>`       | Route requests through an HTTP proxy                              |
+| `--insecure`          | Accept invalid TLS certificates                                   |
+| `--json <path>`       | Write the full result as JSON                                     |
+| `-q, --quiet`         | Only failures and the summary                                     |
+| `-h, --help`          | Show help                                                         |
+| `-V, --version`       | Show the version                                                  |
 
 ### Configuration file
 
@@ -242,7 +262,8 @@ That filename is git-ignored, so target hostnames stay out of the repository.
 
 ### Environment
 
-`SITEWALK_URL`, `SITEWALK_STEPS`, `SITEWALK_PROXY`, `SITEWALK_INSECURE`, `HTTP_PROXY`.
+`SITEWALK_URL`, `SITEWALK_STEPS`, `SITEWALK_PROXY`, `SITEWALK_INSECURE`, and `HTTP_PROXY`
+(lowercase `http_proxy` is accepted too).
 
 Order of precedence: **defaults → config file → environment → command line**.
 
@@ -253,7 +274,7 @@ proxy support:
 
 ```bash
 npm install undici
-sitewalk https://example.com --proxy http://proxy.internal:3128
+sitewalk https://your-site.example --proxy http://proxy.internal:3128
 ```
 
 ## How it works
