@@ -11,6 +11,7 @@ const silentReport = {
     failure() {},
     redirect() {},
     note() {},
+    warning() {},
     summary() {},
 };
 
@@ -217,6 +218,28 @@ describe('Crawler', () => {
         const wide = crawl(pages, { steps: 6, subdomains: true });
         await wide.run();
         assert.ok(wide.client.requests.some((url) => url.includes('blog.')));
+    });
+
+    it('refuses a seed that points outside the scope', async () => {
+        const warnings = [];
+        const client = fakeClient(SITE);
+        const crawler = new Crawler({
+            config: config({ steps: 6, seeds: ['https://elsewhere.test/x', 'not a url', 'https://site.test/a'] }),
+            client,
+            robots: allowAll(),
+            report: { ...silentReport, warning: (text) => warnings.push(text) },
+        });
+
+        await crawler.run();
+
+        assert.ok(!client.requests.some((url) => url.includes('elsewhere.test')), 'requested an off-site seed');
+        assert.deepEqual(
+            crawler.seeds.concat([...client.requests]).some((url) => url.includes('/a')),
+            true,
+        );
+        assert.equal(warnings.length, 2, 'both bad seeds should be reported, not silently dropped');
+        assert.ok(warnings.some((text) => /outside the scope/.test(text)));
+        assert.ok(warnings.some((text) => /not a valid URL/.test(text)));
     });
 
     it('counts a network failure as an error', async () => {

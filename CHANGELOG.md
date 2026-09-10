@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- A seed given with `--seed` or in a configuration file is now held to the same
+  scope as the rest of the walk. Seeds outside it were previously requested,
+  which could take the crawler to an unrelated host; they are now refused and
+  reported. An unparseable seed threw instead of being reported.
+
 ## [0.1.0] - 2026-09-10
 
 ### Added

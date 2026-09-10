@@ -221,27 +221,27 @@ sitewalk <url> [options]
 sitewalk --config sitewalk.config.js
 ```
 
-| Option                |                                                                   |
-| --------------------- | ----------------------------------------------------------------- |
-| `-u, --url <url>`     | Entry point. May also be given as the first positional argument.  |
-| `-c, --config <path>` | Configuration file (default: `./sitewalk.config.js` when present) |
-| `-s, --steps <n>`     | Steps to take, one request each (default 50)                      |
-| `--delay <ms>`        | Pause between requests (default 250)                              |
-| `--timeout <ms>`      | Per-request timeout (default 15000)                               |
-| `--retries <n>`       | Retries for network errors and 429/502/503/504 (default 2)        |
-| `--subdomains`        | Treat subdomains of the entry host as part of the site            |
-| `--no-robots`         | Ignore `robots.txt` and `rel=nofollow` — only for a site you own  |
-| `--sitemap`           | Seed extra starting points from `sitemap.xml`                     |
-| `--seed <url>`        | Extra starting point, repeatable                                  |
-| `--exclude <pattern>` | Skip matching paths, repeatable                                   |
-| `--per-template <n>`  | Max pages per URL shape (default 8)                               |
-| `--user-agent <s>`    | User-Agent to send                                                |
-| `--proxy <url>`       | Route requests through an HTTP proxy                              |
-| `--insecure`          | Accept invalid TLS certificates                                   |
-| `--json <path>`       | Write the full result as JSON                                     |
-| `-q, --quiet`         | Only failures and the summary                                     |
-| `-h, --help`          | Show help                                                         |
-| `-V, --version`       | Show the version                                                  |
+| Option                |                                                                         |
+| --------------------- | ----------------------------------------------------------------------- |
+| `-u, --url <url>`     | Entry point. May also be given as the first positional argument.        |
+| `-c, --config <path>` | Configuration file (default: `./sitewalk.config.js` when present)       |
+| `-s, --steps <n>`     | Steps to take, one request each (default 50)                            |
+| `--delay <ms>`        | Pause between requests (default 250)                                    |
+| `--timeout <ms>`      | Per-request timeout (default 15000)                                     |
+| `--retries <n>`       | Retries for network errors and 429/502/503/504 (default 2)              |
+| `--subdomains`        | Treat subdomains of the entry host as part of the site                  |
+| `--no-robots`         | Ignore `robots.txt` and `rel=nofollow` — only for a site you own        |
+| `--sitemap`           | Seed extra starting points from `sitemap.xml`                           |
+| `--seed <url>`        | Extra starting point, repeatable. Must be within the scope of the walk. |
+| `--exclude <pattern>` | Skip matching paths, repeatable                                         |
+| `--per-template <n>`  | Max pages per URL shape (default 8)                                     |
+| `--user-agent <s>`    | User-Agent to send                                                      |
+| `--proxy <url>`       | Route requests through an HTTP proxy                                    |
+| `--insecure`          | Accept invalid TLS certificates                                         |
+| `--json <path>`       | Write the full result as JSON                                           |
+| `-q, --quiet`         | Only failures and the summary                                           |
+| `-h, --help`          | Show help                                                               |
+| `-V, --version`       | Show the version                                                        |
 
 ### Configuration file
 
@@ -283,14 +283,14 @@ sitewalk https://your-site.example --proxy http://proxy.internal:3128
 
 The defaults assume you may be pointing this at a site you do not control:
 
-|                      |                                                                                                                                                          |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `robots.txt`         | Read and honoured, including `Crawl-delay`. It is the site owner's own statement about where a crawler may go.                                           |
-| `rel="nofollow"`     | Honoured.                                                                                                                                                |
-| Requests             | One at a time, with a pause between them. Never anything but `GET`.                                                                                      |
-| State-changing paths | A built-in list of routes that log out, delete, order, download or otherwise act rather than display is never followed — in English and Czech spellings. |
-| Rate limiting        | `429`, `502`, `503` and `504` are retried with backoff, honouring `Retry-After`, and are not counted as failures.                                        |
-| Scope                | Only the entry host. Apex and `www` count as the same site; anything else needs `--subdomains`.                                                          |
+|                      |                                                                                                                                                                                                           |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `robots.txt`         | Read and honoured, including `Crawl-delay`. It is the site owner's own statement about where a crawler may go.                                                                                            |
+| `rel="nofollow"`     | Honoured.                                                                                                                                                                                                 |
+| Requests             | One at a time, with a pause between them. Never anything but `GET`.                                                                                                                                       |
+| State-changing paths | A built-in list of routes that log out, delete, order, download or otherwise act rather than display is never followed — in English and Czech spellings.                                                  |
+| Rate limiting        | `429`, `502`, `503` and `504` are retried with backoff, honouring `Retry-After`, and are not counted as failures.                                                                                         |
+| Scope                | Only the entry host. Apex and `www` count as the same site; anything else needs `--subdomains`. External links are counted and reported as skipped, never requested — so outbound links are not verified. |
 
 ### Traps it avoids
 

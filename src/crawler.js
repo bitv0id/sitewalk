@@ -48,7 +48,8 @@ export class Crawler {
         this.errors = [];
         this.redirects = [];
         this.warnings = [];
-        this.seeds = config.seeds.map((seed) => normalize(seed)).filter((seed) => seed !== this.start);
+        this.rejectedSeeds = [];
+        this.seeds = this.inScopeSeeds(config.seeds);
         this.skipped = {
             offsite: 0,
             robots: 0,
@@ -73,6 +74,10 @@ export class Crawler {
     }
 
     async run() {
+        for (const { url, reason } of this.rejectedSeeds) {
+            this.report.warning(`Ignoring seed ${url} — ${reason}.`);
+        }
+
         let current = { url: this.start, from: this.start, clicked: null, siblings: [] };
 
         for (let step = 1; step <= this.config.steps; step++) {
@@ -338,23 +343,41 @@ export class Crawler {
         };
     }
 
+    /**
+     * A seed is only useful if the walk is allowed to go there. Anything outside
+     * the scope is dropped and reported rather than silently ignored — a seed
+     * that does nothing is a mistake the caller wants to hear about.
+     */
+    inScopeSeeds(urls) {
+        const accepted = [];
+
+        for (const url of urls) {
+            let normalized;
+            try {
+                normalized = normalize(url);
+            } catch {
+                this.rejectedSeeds.push({ url, reason: 'not a valid URL' });
+                continue;
+            }
+
+            if (normalized === this.start) {
+                continue;
+            }
+
+            if (!hostInScope(new URL(normalized).hostname, this.baseHost, this.config.subdomains)) {
+                this.rejectedSeeds.push({ url, reason: 'outside the scope of this walk' });
+                continue;
+            }
+
+            accepted.push(normalized);
+        }
+
+        return accepted;
+    }
+
     /** Seeds are consumed in random order so repeated runs cover different ground. */
     addSeeds(urls) {
-        const seeds = shuffle(urls)
-            .map((url) => {
-                try {
-                    return normalize(url);
-                } catch {
-                    return null;
-                }
-            })
-            .filter(
-                (url) =>
-                    url !== null &&
-                    url !== this.start &&
-                    hostInScope(new URL(url).hostname, this.baseHost, this.config.subdomains),
-            );
-
+        const seeds = this.inScopeSeeds(shuffle(urls));
         this.seeds.push(...seeds);
 
         return seeds.length;

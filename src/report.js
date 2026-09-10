@@ -92,6 +92,11 @@ export function createReport({ quiet = false } = {}) {
             }
         },
 
+        /** Always shown, including in quiet mode — it means the caller asked for something impossible. */
+        warning(text) {
+            out(`  ${warn('!')} ${text}`);
+        },
+
         note(progress, text) {
             if (!quiet) {
                 out(`${progress} ${dim('ℹ')} ${dim(text)}`);
