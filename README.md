@@ -73,28 +73,34 @@ Node 20 or newer. Nothing else — there are no runtime dependencies.
 
 ## Installation
 
-Run it straight from a clone:
-
 ```bash
 git clone https://github.com/bitv0id/sitewalk.git
 cd sitewalk
+npm link
+```
+
+`npm link` puts the `sitewalk` command on your `PATH`, which is what every
+example in this README assumes. It symlinks this checkout rather than copying it,
+so your edits take effect immediately. Remove it again with
+`npm unlink -g sitewalk`.
+
+Under nvm the link belongs to the Node version that was active when you ran it —
+switch versions and you will need to run `npm link` again.
+
+**Without linking**, run it from the clone and read `node bin/cli.js` wherever an
+example says `sitewalk`:
+
+```bash
 node bin/cli.js https://example.com
 ```
 
-Put `sitewalk` on your `PATH`:
-
-```bash
-npm link
-sitewalk https://example.com
-```
-
-Run it without cloning:
+**Without cloning:**
 
 ```bash
 npx github:bitv0id/sitewalk https://example.com
 ```
 
-Or use the container, for hosts without Node:
+**In a container**, for hosts that have no Node:
 
 ```bash
 docker build -t sitewalk .
