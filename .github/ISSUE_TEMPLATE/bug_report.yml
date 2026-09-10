@@ -1,0 +1,57 @@
+name: Bug report
+description: Something the crawler got wrong
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Most bugs here are "this particular markup or server behaviour does
+        something unexpected", so the exact command and output matter a lot.
+
+  - type: textarea
+    id: command
+    attributes:
+      label: Command
+      description: The exact command you ran.
+      render: shell
+      placeholder: node bin/cli.js https://example.com --steps 50
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Output
+      description: What it printed. Trim it to the relevant part.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected instead
+    validations:
+      required: true
+
+  - type: input
+    id: url
+    attributes:
+      label: Public URL
+      description: If the site is public, the address where this reproduces.
+
+  - type: input
+    id: node
+    attributes:
+      label: Node version
+      placeholder: v22.11.0
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: sitewalk version
+      placeholder: 0.1.0 (or the commit you are on)
+    validations:
+      required: true

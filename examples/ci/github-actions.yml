@@ -1,0 +1,44 @@
+# GitHub Actions — walk a site on a schedule and on demand.
+# Copy into .github/workflows/ in the repository that owns the site.
+
+name: Link check
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      url:
+        description: Site to walk
+        required: true
+      steps:
+        description: Pages to visit
+        default: '100'
+
+permissions:
+  contents: read
+
+jobs:
+  walk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: bitv0id/sitewalk
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Walk the site
+        run: |
+          node bin/cli.js "${{ inputs.url || vars.SITEWALK_URL }}" \
+            --steps "${{ inputs.steps || '100' }}" \
+            --json result.json
+
+      - name: Upload result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sitewalk-result
+          path: result.json

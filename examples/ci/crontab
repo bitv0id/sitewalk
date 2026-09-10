@@ -1,0 +1,12 @@
+# Nightly walk from a server or a laptop. Mails the output on failure only,
+# because cron mails whatever the job writes to stdout.
+#
+#   crontab -e   and paste, adjusting the paths.
+
+MAILTO=you@example.com
+
+# Every night at 03:15. Quiet output, so a clean run says nothing at all.
+15 3 * * * cd /opt/sitewalk && /usr/bin/node bin/cli.js https://example.com --steps 200 --delay 500 --quiet || true
+
+# Weekly deep walk, keeping the JSON around for comparison.
+30 4 * * 0 cd /opt/sitewalk && /usr/bin/node bin/cli.js https://example.com --steps 1000 --delay 1000 --sitemap --quiet --json /var/log/sitewalk/$(date +\%F).json

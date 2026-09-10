@@ -1,0 +1,11 @@
+node_modules/
+
+# Local run configuration — keep target hostnames out of the repository.
+sitewalk.config.js
+sitewalk.config.mjs
+*.local.js
+
+# Run output
+*.log
+results/
+*.result.json

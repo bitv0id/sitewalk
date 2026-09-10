@@ -1,0 +1,61 @@
+{
+  "name": "sitewalk",
+  "version": "0.1.0",
+  "description": "Random-walk crawler that checks any website for broken links and error pages. No runtime dependencies.",
+  "type": "module",
+  "license": "MIT",
+  "author": "bitv0id <4squall@gmail.com>",
+  "homepage": "https://github.com/bitv0id/sitewalk#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bitv0id/sitewalk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bitv0id/sitewalk/issues"
+  },
+  "keywords": [
+    "crawler",
+    "link-checker",
+    "broken-links",
+    "dead-links",
+    "smoke-test",
+    "site-monitoring",
+    "uptime",
+    "qa",
+    "ci",
+    "cli"
+  ],
+  "bin": {
+    "sitewalk": "./bin/cli.js"
+  },
+  "main": "./src/main.js",
+  "exports": {
+    ".": "./src/main.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "start": "node bin/cli.js",
+    "test": "node --test",
+    "test:coverage": "node --test --experimental-test-coverage",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run lint && npm run format:check && npm test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.10.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.9.6"
+  }
+}

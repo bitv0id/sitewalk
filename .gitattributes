@@ -1,0 +1,13 @@
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+
+# Keep noise out of release tarballs and language statistics.
+/test export-ignore
+/examples export-ignore
+/.github export-ignore
+/.editorconfig export-ignore
+/.gitattributes export-ignore

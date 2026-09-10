@@ -1,0 +1,53 @@
+# GitLab CI — run the crawler against a deployed environment.
+#
+# Copy into .gitlab-ci.yml, or include it from one:
+#   include:
+#     - local: examples/ci/gitlab-ci.yml
+#
+# Set SITEWALK_URL as a CI/CD variable, or override it per job.
+
+.sitewalk:
+  image: node:22-alpine
+  variables:
+    SITEWALK_STEPS: '100'
+  script:
+    - node bin/cli.js --steps "$SITEWALK_STEPS" --json sitewalk.json
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+      - sitewalk.json
+
+# Run against every review deployment. allow_failure keeps a flaky third-party
+# link from blocking a merge — drop it once the site is clean.
+crawl review:
+  extends: .sitewalk
+  stage: test
+  allow_failure: true
+  variables:
+    SITEWALK_URL: 'https://$CI_COMMIT_REF_SLUG.review.example.com'
+    SITEWALK_STEPS: '50'
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+
+# A deeper walk of production, on a schedule. Configure the schedule under
+# CI/CD → Schedules; this one does not run on ordinary pushes.
+crawl production:
+  extends: .sitewalk
+  stage: test
+  variables:
+    SITEWALK_URL: 'https://example.com'
+    SITEWALK_STEPS: '300'
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'schedule'
+
+# Behind a corporate proxy, or against a self-signed staging certificate:
+#
+# crawl staging:
+#   extends: .sitewalk
+#   variables:
+#     SITEWALK_URL: 'https://staging.internal.example.com'
+#     SITEWALK_PROXY: 'http://proxy.internal:3128'
+#     SITEWALK_INSECURE: '1'
+#   before_script:
+#     - npm install undici    # only needed for proxy support

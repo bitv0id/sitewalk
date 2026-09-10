@@ -1,0 +1,9 @@
+.git/
+.github/
+node_modules/
+test/
+examples/
+results/
+*.md
+!README.md
+sitewalk.config.js
